@@ -24,10 +24,10 @@ jobs:
         php: ['8.3', '8.4']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Checkout EspoCRM
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: espocrm/espocrm
           ref: stable
@@ -88,7 +88,7 @@ jobs:
           --health-interval=10s --health-timeout=5s --health-retries=10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -99,9 +99,11 @@ jobs:
           ini-values: memory_limit=1024M
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          # Node 24 ships npm 11. The lock files of newer EspoCRM versions (10.1+)
+          # are not accepted by `npm ci` of npm 10.
+          node-version: '24'
 
       - name: Install tooling
         run: |
@@ -166,7 +168,7 @@ jobs:
 
       - name: Upload extension package
         if: matrix.espocrm == 'stable'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: extension-package
           path: build/*.zip
