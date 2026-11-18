@@ -1,0 +1,12 @@
+[
+    {
+        "route": "/PublicHolidays/calendar/:id/sync",
+        "method": "post",
+        "actionClassName": "Espo\\Modules\\PublicHolidays\\Api\\PostSyncCalendar"
+    },
+    {
+        "route": "/PublicHolidays/regionHolidays",
+        "method": "get",
+        "actionClassName": "Espo\\Modules\\PublicHolidays\\Api\\GetRegionHolidays"
+    }
+]

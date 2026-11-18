@@ -1,0 +1,14 @@
+{
+    "setup": {
+        "itemList": [
+            "__APPEND__",
+            {
+                "url": "#Admin/publicHolidays",
+                "label": "Public Holidays",
+                "iconClass": "fas fa-umbrella-beach",
+                "description": "publicHolidays",
+                "recordView": "public-holidays:views/admin/public-holidays"
+            }
+        ]
+    }
+}

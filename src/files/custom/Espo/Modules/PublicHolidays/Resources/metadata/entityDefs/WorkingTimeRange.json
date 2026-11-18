@@ -1,0 +1,11 @@
+{
+    "fields": {
+        "phHolidayKey": {
+            "type": "varchar",
+            "maxLength": 100,
+            "readOnly": true,
+            "index": true,
+            "customizationDisabled": true
+        }
+    }
+}

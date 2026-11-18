@@ -1,0 +1,19 @@
+{
+    "name": "oguzbinbir/espocrm-public-holidays-module",
+    "description": "Runtime dependencies of the Public Holidays extension.",
+    "type": "library",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/azuyalabs/yasumi"
+        }
+    ],
+    "require": {
+        "azuyalabs/yasumi": "^2.12"
+    },
+    "config": {
+        "platform": {
+            "php": "8.3"
+        }
+    }
+}

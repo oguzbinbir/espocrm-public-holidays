@@ -1,0 +1,8 @@
+{
+    "labels": {
+        "Public Holidays": "Feiertage"
+    },
+    "descriptions": {
+        "publicHolidays": "Automatische gesetzliche Feiertage für Arbeitszeitkalender."
+    }
+}

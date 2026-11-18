@@ -1,0 +1,172 @@
+name: Test
+
+on:
+  push:
+    branches: ['main', 'master']
+  pull_request:
+  # Weekly run to detect breaking changes in new EspoCRM or Yasumi releases.
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+env:
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+  CHROMEDRIVER_SKIP_DOWNLOAD: 'true'
+
+jobs:
+  unit:
+    name: Unit tests & static analysis (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout EspoCRM
+        uses: actions/checkout@v4
+        with:
+          repository: espocrm/espocrm
+          ref: stable
+          path: site
+          fetch-depth: 1
+          sparse-checkout: |
+            application/
+            custom/
+            dev/
+            bootstrap.php
+            composer.json
+            composer.lock
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: intl, mbstring, zip, gd, pdo_mysql
+          tools: composer:v2
+          ini-values: memory_limit=1024M
+
+      - name: Composer install (EspoCRM)
+        run: composer install --no-interaction --ignore-platform-reqs
+        working-directory: site
+
+      - name: Composer install (dev tools)
+        run: composer install --no-interaction
+
+      - name: Composer install (module dependencies)
+        run: composer install --no-interaction --no-dev
+        working-directory: src/files/custom/Espo/Modules/PublicHolidays
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --no-progress
+
+      - name: Unit tests
+        run: vendor/bin/phpunit tests/unit
+
+  integration:
+    name: Integration tests (EspoCRM ${{ matrix.espocrm }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Minimum supported version and the latest stable release.
+        espocrm: ['10.0.4', 'stable']
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: espo_dev
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, zip, gd, pdo_mysql
+          tools: composer:v2
+          ini-values: memory_limit=1024M
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install tooling
+        run: |
+          npm ci
+          npm install -g grunt-cli
+
+      - name: Create test databases
+        run: mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE IF NOT EXISTS espo_test;"
+
+      - name: Create config
+        run: |
+          cat > config.json <<EOF
+          {
+              "espocrm": {
+                  "repository": "https://github.com/espocrm/espocrm.git",
+                  "branch": "${{ matrix.espocrm }}"
+              },
+              "database": {
+                  "host": "127.0.0.1",
+                  "dbname": "espo_dev",
+                  "user": "root",
+                  "password": "root"
+              },
+              "install": {
+                  "language": "de_DE",
+                  "defaultOwner": "$(id -un)",
+                  "defaultGroup": "$(id -gn)",
+                  "siteUrl": "http://localhost"
+              }
+          }
+          EOF
+
+      - name: Build EspoCRM with extension
+        run: npm run all
+
+      - name: Build test instance
+        run: grunt test
+        working-directory: site
+
+      - name: Integration test config
+        run: |
+          cat > site/tests/integration/config.php <<'EOF'
+          <?php
+          return [
+              'database' => [
+                  'driver' => 'pdo_mysql',
+                  'host' => '127.0.0.1',
+                  'charset' => 'utf8mb4',
+                  'dbname' => 'espo_test',
+                  'user' => 'root',
+                  'password' => 'root',
+              ],
+          ];
+          EOF
+
+      - name: Integration tests
+        run: scripts/integration-tests.sh
+
+      - name: Build extension package
+        if: matrix.espocrm == 'stable'
+        run: npm run extension
+
+      - name: Upload extension package
+        if: matrix.espocrm == 'stable'
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-package
+          path: build/*.zip

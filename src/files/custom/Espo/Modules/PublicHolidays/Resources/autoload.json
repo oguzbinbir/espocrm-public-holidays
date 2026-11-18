@@ -1,0 +1,5 @@
+{
+    "psr-4": {
+        "Yasumi\\": "custom/Espo/Modules/PublicHolidays/vendor/azuyalabs/yasumi/src/Yasumi"
+    }
+}

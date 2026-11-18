@@ -1,0 +1,16 @@
+{
+    "name": "espocrm/ext-public-holidays",
+    "require": {
+        "php": ">=8.3"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Espo\\Modules\\PublicHolidays\\": "src/files/custom/Espo/Modules/PublicHolidays",
+            "tests\\unit\\Espo\\Modules\\PublicHolidays\\": "tests/unit/Espo/Modules/PublicHolidays"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.5",
+        "phpstan/phpstan": "^2.1"
+    }
+}

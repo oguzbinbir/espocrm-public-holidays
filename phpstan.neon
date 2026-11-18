@@ -1,0 +1,15 @@
+parameters:
+    level: 8
+    inferPrivatePropertyTypeFromConstructor: true
+    treatPhpDocTypesAsCertain: false
+    paths:
+        - src/files/custom
+        - src/scripts
+    excludePaths:
+        - src/files/custom/Espo/Modules/PublicHolidays/vendor/*
+    reportUnmatchedIgnoredErrors: false
+    scanDirectories:
+        - site/application
+        - site/vendor
+    bootstrapFiles:
+        - src/files/custom/Espo/Modules/PublicHolidays/vendor/autoload.php

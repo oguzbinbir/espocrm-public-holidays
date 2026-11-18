@@ -1,0 +1,6 @@
+{
+    "SyncPublicHolidays": {
+        "name": "Sync Public Holidays",
+        "jobClassName": "Espo\\Modules\\PublicHolidays\\Jobs\\SyncPublicHolidays"
+    }
+}

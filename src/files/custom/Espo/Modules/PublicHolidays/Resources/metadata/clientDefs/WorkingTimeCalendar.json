@@ -1,0 +1,50 @@
+{
+    "sidePanels": {
+        "detail": [
+            "__APPEND__",
+            {
+                "name": "phPublicHolidays",
+                "label": "Public Holidays",
+                "view": "views/record/panels/side",
+                "fieldList": ["phHolidayRegion", "phExcludedHolidays"]
+            }
+        ],
+        "edit": [
+            "__APPEND__",
+            {
+                "name": "phPublicHolidays",
+                "label": "Public Holidays",
+                "view": "views/record/panels/side",
+                "fieldList": ["phHolidayRegion", "phExcludedHolidays"]
+            }
+        ],
+        "detailSmall": [
+            "__APPEND__",
+            {
+                "name": "phPublicHolidays",
+                "label": "Public Holidays",
+                "view": "views/record/panels/side",
+                "fieldList": ["phHolidayRegion", "phExcludedHolidays"]
+            }
+        ],
+        "editSmall": [
+            "__APPEND__",
+            {
+                "name": "phPublicHolidays",
+                "label": "Public Holidays",
+                "view": "views/record/panels/side",
+                "fieldList": ["phHolidayRegion", "phExcludedHolidays"]
+            }
+        ]
+    },
+    "detailActionList": [
+        "__APPEND__",
+        {
+            "name": "phSyncPublicHolidays",
+            "label": "Sync Public Holidays",
+            "acl": "edit",
+            "handler": "public-holidays:handlers/sync-public-holidays",
+            "actionFunction": "process"
+        }
+    ]
+}

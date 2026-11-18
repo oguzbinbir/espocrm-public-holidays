@@ -1,0 +1,17 @@
+{
+    "fields": {
+        "phLeadYears": {
+            "type": "int",
+            "min": 0,
+            "max": 5,
+            "default": 1,
+            "required": true,
+            "tooltip": true
+        },
+        "phOnlyActiveUsers": {
+            "type": "bool",
+            "default": true,
+            "tooltip": true
+        }
+    }
+}

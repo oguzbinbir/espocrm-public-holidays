@@ -1,0 +1,10 @@
+{
+    "fields": {
+        "phLeadYears": "Lead Time (Years)",
+        "phOnlyActiveUsers": "Only Calendars of Active Users"
+    },
+    "tooltips": {
+        "phLeadYears": "How far ahead public holidays are created: 0 = until the end of the current year, 1 = until the end of the next year, etc.",
+        "phOnlyActiveUsers": "Only calendars that are assigned to at least one active user receive public holidays."
+    }
+}

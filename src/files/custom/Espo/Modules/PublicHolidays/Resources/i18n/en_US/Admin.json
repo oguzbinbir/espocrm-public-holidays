@@ -1,0 +1,8 @@
+{
+    "labels": {
+        "Public Holidays": "Public Holidays"
+    },
+    "descriptions": {
+        "publicHolidays": "Automatic public holidays for working time calendars."
+    }
+}
