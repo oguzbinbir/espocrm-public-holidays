@@ -4,7 +4,7 @@
         "phOnlyActiveUsers": "Only Calendars of Active Users"
     },
     "tooltips": {
-        "phLeadYears": "How far ahead public holidays are created: 0 = until the end of the current year, 1 = until the end of the next year, etc.",
+        "phLeadYears": "How far ahead public holidays are created (0 to 5 years): 0 = until the end of the current year, 1 = until the end of the next year, 2 = until the end of the year after next, etc., up to 5.",
         "phOnlyActiveUsers": "Only calendars that are assigned to at least one active user receive public holidays."
     }
 }

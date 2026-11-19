@@ -4,7 +4,7 @@
         "phOnlyActiveUsers": "Nur Kalender aktiver Benutzer"
     },
     "tooltips": {
-        "phLeadYears": "Wie weit im Voraus Feiertage angelegt werden: 0 = bis Ende des laufenden Jahres, 1 = bis Ende des Folgejahres usw.",
+        "phLeadYears": "Wie weit im Voraus Feiertage angelegt werden (0 bis 5 Jahre): 0 = bis Ende des laufenden Jahres, 1 = bis Ende des Folgejahres, 2 = bis Ende des übernächsten Jahres usw., maximal 5.",
         "phOnlyActiveUsers": "Nur Kalender, die mindestens einem aktiven Benutzer zugeordnet sind, erhalten Feiertage."
     }
 }
