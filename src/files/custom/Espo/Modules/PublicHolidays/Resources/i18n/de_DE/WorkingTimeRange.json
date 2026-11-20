@@ -1,5 +1,8 @@
 {
     "fields": {
         "phHolidayKey": "Feiertagsschlüssel"
+    },
+    "messages": {
+        "phAutoCreated": "Automatisch angelegt durch die Erweiterung „Feiertage“ ({region})."
     }
 }

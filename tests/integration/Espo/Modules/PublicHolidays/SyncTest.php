@@ -134,6 +134,13 @@ class SyncTest extends BaseTestCase
         $this->assertSame('2027-05-27', $range->get('dateStart'));
         $this->assertSame('2027-05-27', $range->get('dateEnd'));
         $this->assertNotEmpty($range->get('name'));
+
+        // Translated description with a readable region name (system language).
+        $description = (string) $range->get('description');
+
+        $this->assertStringContainsString('Baden-Württemberg', $description);
+        $this->assertStringNotContainsString('{region}', $description);
+        $this->assertStringNotContainsString('phAutoCreated', $description);
     }
 
     public function testIsIdempotent(): void

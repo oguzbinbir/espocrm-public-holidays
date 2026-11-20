@@ -5,6 +5,8 @@ namespace Espo\Modules\PublicHolidays\Tools;
 use DateTimeZone;
 use Espo\Core\Field\Date;
 use Espo\Core\Utils\Config;
+use Espo\Core\Utils\Language;
+use Espo\Core\Utils\Language\LanguageFactory;
 use Espo\Core\Utils\Log;
 use Espo\Entities\User;
 use Espo\Entities\WorkingTimeCalendar;
@@ -27,14 +29,17 @@ class CalendarSyncService
     public const FIELD_EXCLUDED = 'phExcludedHolidays';
     public const FIELD_KEY = 'phHolidayKey';
 
-    private const RANGE_DESCRIPTION = 'Created automatically by the Public Holidays extension.';
+    private const DEFAULT_LANGUAGE = 'en_US';
+    private const FALLBACK_DESCRIPTION = 'Created automatically by the Public Holidays extension ({region}).';
 
     private SyncPlanner $planner;
+    private ?Language $systemLanguage = null;
 
     public function __construct(
         private EntityManager $entityManager,
         private Config $config,
         private Log $log,
+        private LanguageFactory $languageFactory,
         HolidayProvider $holidayProvider,
     ) {
         $this->planner = new SyncPlanner($holidayProvider);
@@ -211,13 +216,43 @@ class CalendarSyncService
             'type' => WorkingTimeRange::TYPE_NON_WORKING,
             'dateStart' => $holiday->date,
             'dateEnd' => $holiday->date,
-            'description' => self::RANGE_DESCRIPTION . ' (' . $holiday->region . ')',
+            'description' => $this->getDescription($holiday->region),
             self::FIELD_KEY => $holiday->getUniqueKey(),
         ]);
 
         $this->entityManager->saveEntity($range);
 
         return $range;
+    }
+
+    /**
+     * The description is stored in the record, so it is written in the system language
+     * (like the holiday names), independent of the user who triggers the sync.
+     */
+    private function getDescription(string $region): string
+    {
+        $language = $this->getSystemLanguage();
+
+        $template = $language->get(WorkingTimeRange::ENTITY_TYPE . '.messages.phAutoCreated');
+
+        if (!is_string($template) || $template === '') {
+            $template = self::FALLBACK_DESCRIPTION;
+        }
+
+        $regionLabel = $language->translateOption($region, self::FIELD_REGION, WorkingTimeCalendar::ENTITY_TYPE);
+
+        return str_replace('{region}', (string) $regionLabel, $template);
+    }
+
+    private function getSystemLanguage(): Language
+    {
+        if (!$this->systemLanguage) {
+            $code = $this->config->get('language') ?: self::DEFAULT_LANGUAGE;
+
+            $this->systemLanguage = $this->languageFactory->create($code);
+        }
+
+        return $this->systemLanguage;
     }
 
     private function getToday(): string

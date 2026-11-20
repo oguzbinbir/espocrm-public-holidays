@@ -1,5 +1,8 @@
 {
     "fields": {
         "phHolidayKey": "Public Holiday Key"
+    },
+    "messages": {
+        "phAutoCreated": "Created automatically by the Public Holidays extension ({region})."
     }
 }
