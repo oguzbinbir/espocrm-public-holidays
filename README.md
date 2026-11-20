@@ -86,6 +86,12 @@ Manually created holidays have no `phHolidayKey` and are therefore not recognize
 
 The EspoCRM cron must be active for the weekly synchronization.
 
+## License
+
+[MIT](LICENSE) © 2026 Oguz Binbir
+
+The extension package includes [Yasumi](https://github.com/azuyalabs/yasumi) (MIT License). EspoCRM itself is licensed under AGPL-3.0.
+
 ---
 
 ## Development

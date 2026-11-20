@@ -85,6 +85,12 @@ Vorhandene, von Hand angelegte Feiertage haben keinen `phHolidayKey` und werden 
 
 Damit die wöchentliche Synchronisierung läuft, muss der Cron von EspoCRM aktiv sein.
 
+## Lizenz
+
+[MIT](LICENSE) © 2026 Oguz Binbir
+
+Das Paket enthält [Yasumi](https://github.com/azuyalabs/yasumi) (MIT-Lizenz). EspoCRM selbst steht unter AGPL-3.0.
+
 ---
 
 ## Entwicklung

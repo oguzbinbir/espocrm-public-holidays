@@ -2,7 +2,8 @@ import {buildGeneral} from 'espo-extension-tools';
 import fs from 'fs';
 import path from 'path';
 
-const vendorDir = 'build/tmp/files/custom/Espo/Modules/PublicHolidays/vendor';
+const moduleDir = 'build/tmp/files/custom/Espo/Modules/PublicHolidays';
+const vendorDir = moduleDir + '/vendor';
 
 /**
  * Removes files from the bundled vendor directory that are not needed at runtime
@@ -24,6 +25,16 @@ function pruneVendor() {
     }
 }
 
+/**
+ * Includes the license of the extension in the package.
+ */
+function copyLicense() {
+    fs.copyFileSync('LICENSE', path.join(moduleDir, 'LICENSE'));
+}
+
 buildGeneral({
-    extensionHook: pruneVendor,
+    extensionHook: () => {
+        pruneVendor();
+        copyLicense();
+    },
 });

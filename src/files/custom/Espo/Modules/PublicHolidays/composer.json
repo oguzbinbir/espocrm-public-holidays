@@ -2,6 +2,7 @@
     "name": "oguzbinbir/espocrm-public-holidays-module",
     "description": "Runtime dependencies of the Public Holidays extension.",
     "type": "library",
+    "license": "MIT",
     "repositories": [
         {
             "type": "vcs",

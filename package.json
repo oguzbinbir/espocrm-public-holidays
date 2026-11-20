@@ -2,6 +2,7 @@
   "name": "espocrm-ext-public-holidays",
   "version": "0.1.2",
   "description": "",
+  "license": "MIT",
   "scripts": {
     "sa": "vendor/bin/phpstan",
     "unit-tests": "vendor/bin/phpunit",

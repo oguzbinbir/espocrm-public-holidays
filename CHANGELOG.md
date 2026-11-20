@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [0.1.2] - 2026-11-20
 
+### Added
+- Published under the MIT License.
+
 ### Changed
 - The description of automatically created exceptions is translated (system language) and contains the readable region name, e.g. "Automatisch angelegt durch die Erweiterung „Feiertage“ (Deutschland – Baden-Württemberg)." Existing exceptions keep their description.
 - Minimum EspoCRM version is now 10.0.4 (the oldest tested version).
