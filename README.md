@@ -154,16 +154,13 @@ vendor/bin/phpunit                 # checks among others that all regions are su
 
 ### Release
 
-Releases are created automatically by `.github/workflows/release.yml` when a version tag is pushed:
+1. Set the version and the changelog, commit and push to `main`:
+   ```bash
+   npm version patch --no-git-tag-version   # or minor / major; updates package.json
+   # add a section "## [X.Y.Z] - date" to CHANGELOG.md
+   ```
+2. On GitHub: *Releases → Create a new release*, create the tag `vX.Y.Z` on `main`, enter a title and the release notes (e.g. the section from `CHANGELOG.md`), *Publish release*.
 
-```bash
-npm version patch --no-git-tag-version   # or minor / major; updates package.json
-# add a section "## [X.Y.Z] - date" to CHANGELOG.md
-git commit -am "Release vX.Y.Z"
-git tag vX.Y.Z
-git push && git push origin vX.Y.Z
-```
-
-The workflow checks that the tag matches `package.json` and `CHANGELOG.md`, runs all tests, builds the package and publishes a GitHub release with the ZIP file and the changelog section as release notes. See [CHANGELOG.md](CHANGELOG.md) for the history.
+The workflow `.github/workflows/release.yml` then checks that the tag matches `package.json` and `CHANGELOG.md`, runs all tests, builds the package and attaches the ZIP file to the release. If anything fails, the release is turned back into a draft. See [CHANGELOG.md](CHANGELOG.md) for the history.
 
 To build the package locally: `npm run extension` (output in `build/`).

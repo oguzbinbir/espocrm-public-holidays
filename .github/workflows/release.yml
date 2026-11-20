@@ -1,15 +1,19 @@
 name: Release
 
-# Creates a GitHub release with the extension package when a version tag is pushed:
+# Runs when a release is published on GitHub ("Create a new release" with a tag vX.Y.Z).
 #
-#     npm version patch            # or minor / major; updates package.json
-#     # add the new version to CHANGELOG.md
-#     git commit -am "Release vX.Y.Z" && git tag vX.Y.Z
-#     git push && git push origin vX.Y.Z
+# Before publishing a release:
+#   - set the version in package.json (e.g. `npm version patch --no-git-tag-version`),
+#   - add a section "## [X.Y.Z] - date" to CHANGELOG.md,
+#   - commit and push to main.
+#
+# The workflow checks the version, runs all tests, builds the extension package and
+# attaches the ZIP file to the release. If anything fails, the release is turned back
+# into a draft, so that no release without a tested package stays published.
 
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
 
 env:
   PUPPETEER_SKIP_DOWNLOAD: 'true'
@@ -20,36 +24,38 @@ jobs:
   check:
     name: Check version
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
 
       - name: Tag must match package.json and CHANGELOG.md
-        id: version
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
+          if [[ ! "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The tag '$TAG_NAME' must have the format vX.Y.Z (e.g. v0.1.2)."
+            exit 1
+          fi
+
+          VERSION="${TAG_NAME#v}"
           PACKAGE=$(node -p "require('./package.json').version")
 
-          if [ "$TAG" != "$PACKAGE" ]; then
-            echo "::error::Tag v$TAG does not match the version $PACKAGE in package.json."
+          if [ "$VERSION" != "$PACKAGE" ]; then
+            echo "::error::Tag $TAG_NAME does not match the version $PACKAGE in package.json."
             exit 1
           fi
 
-          if ! grep -q "^## \[$TAG\]" CHANGELOG.md; then
-            echo "::error::CHANGELOG.md has no section '## [$TAG]'."
+          if ! grep -q "^## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section '## [$VERSION]'."
             exit 1
           fi
-
-          echo "version=$TAG" >> "$GITHUB_OUTPUT"
 
   test:
     name: Tests
     needs: check
     uses: ./.github/workflows/test.yml
 
-  release:
-    name: Build and publish
+  package:
+    name: Build and attach package
     needs: [check, test]
     runs-on: ubuntu-latest
     permissions:
@@ -75,21 +81,25 @@ jobs:
           npm ci
           npm run extension
 
-      - name: Release notes from CHANGELOG.md
-        run: |
-          VERSION="${{ needs.check.outputs.version }}"
-          # Text between "## [VERSION]" and the next "## [" heading.
-          awk -v v="$VERSION" '
-            $0 ~ "^## \\[" v "\\]" {found=1; next}
-            found && /^## \[/ {exit}
-            found {print}
-          ' CHANGELOG.md > notes.md
-          cat notes.md
-
-      - name: Create GitHub release
+      - name: Attach package to the release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG_NAME" build/*.zip --clobber --repo "$GITHUB_REPOSITORY"
+
+  revert-to-draft:
+    name: Revert release to draft on failure
+    needs: [check, test, package]
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Turn the release back into a draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          gh release create "$GITHUB_REF_NAME" build/*.zip \
-            --title "$GITHUB_REF_NAME" \
-            --notes-file notes.md
+          gh release edit "$TAG_NAME" --draft=true --repo "$GITHUB_REPOSITORY"
+          echo "::warning::The release $TAG_NAME was turned back into a draft because the checks failed."
