@@ -4,10 +4,12 @@ on:
   push:
     branches: ['main', 'master']
   pull_request:
-  # Weekly run to detect breaking changes in new EspoCRM or Yasumi releases.
+  # Monthly run to detect breaking changes in new EspoCRM releases.
   schedule:
-    - cron: '17 4 * * 1'
+    - cron: '17 4 1 * *'
   workflow_dispatch:
+  # Called by the release workflow.
+  workflow_call:
 
 env:
   PUPPETEER_SKIP_DOWNLOAD: 'true'

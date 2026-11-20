@@ -2,7 +2,7 @@
 
 **English** | [Deutsch](README.de.md)
 
-Extension for EspoCRM 10.0 and later. It adds statutory public holidays automatically as **non-working exceptions** to working time calendars. Holidays are calculated with the [Yasumi](https://www.yasumi.dev) library for 156 countries and regions, including all German federal states, Austria and Switzerland.
+Extension for EspoCRM 10.0.4 and later. It adds statutory public holidays automatically as **non-working exceptions** to working time calendars. Holidays are calculated with the [Yasumi](https://www.yasumi.dev) library for 156 countries and regions, including all German federal states, Austria and Switzerland.
 
 ## Features
 
@@ -79,7 +79,7 @@ Manually created holidays have no `phHolidayKey` and are therefore not recognize
 
 ## Installation
 
-1. Download the package `public-holidays-x.y.z.zip`: from the GitHub workflow (artifact *extension-package*) or build it locally with `npm run extension`.
+1. Download the package `public-holidays-x.y.z.zip` from the [Releases](../../releases) page.
 2. In EspoCRM, upload and install it under *Administration → Extensions*.
 3. Check the settings under *Administration → Public Holidays*.
 4. Set the public holiday region in the working time calendars.
@@ -135,12 +135,12 @@ scripts/integration-tests.sh
 
 The integration tests cover, among others: creating and linking, repeated runs without changes, shared exceptions of several calendars, exclusions, region changes, unchanged past, untouched manual exceptions, active user filter, lead time, both hooks, the scheduled job, the API and EspoCRM's working time calculation (Corpus Christi is no longer a working day afterwards).
 
-**GitHub Actions** (`.github/workflows/test.yml`) run on every push, on pull requests and **weekly**:
+**GitHub Actions** (`.github/workflows/test.yml`) run on every push, on pull requests and **monthly**:
 - unit tests and PHPStan with PHP 8.3 and 8.4,
 - integration tests against **EspoCRM 10.0.4** (minimum version) and **stable** (latest version),
 - package build. The installation package is available as an artifact.
 
-This way, it is noticed automatically when an EspoCRM or Yasumi update breaks the extension.
+The monthly run tests against the latest EspoCRM release even if the extension does not change, so a breaking EspoCRM update is noticed before you update your CRM. The Yasumi version is pinned in `composer.lock` and only changes when it is updated deliberately (see below); the tests then run because of the push.
 
 ### Updating Yasumi
 
@@ -152,9 +152,18 @@ php scripts/generate-regions.php   # regenerate the region list
 vendor/bin/phpunit                 # checks among others that all regions are supported
 ```
 
-### Version and package
+### Release
+
+Releases are created automatically by `.github/workflows/release.yml` when a version tag is pushed:
 
 ```bash
-npm version patch     # or minor / major
-npm run extension     # package in build/
+npm version patch --no-git-tag-version   # or minor / major; updates package.json
+# add a section "## [X.Y.Z] - date" to CHANGELOG.md
+git commit -am "Release vX.Y.Z"
+git tag vX.Y.Z
+git push && git push origin vX.Y.Z
 ```
+
+The workflow checks that the tag matches `package.json` and `CHANGELOG.md`, runs all tests, builds the package and publishes a GitHub release with the ZIP file and the changelog section as release notes. See [CHANGELOG.md](CHANGELOG.md) for the history.
+
+To build the package locally: `npm run extension` (output in `build/`).

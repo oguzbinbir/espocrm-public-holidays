@@ -1,0 +1,95 @@
+name: Release
+
+# Creates a GitHub release with the extension package when a version tag is pushed:
+#
+#     npm version patch            # or minor / major; updates package.json
+#     # add the new version to CHANGELOG.md
+#     git commit -am "Release vX.Y.Z" && git tag vX.Y.Z
+#     git push && git push origin vX.Y.Z
+
+on:
+  push:
+    tags: ['v*']
+
+env:
+  PUPPETEER_SKIP_DOWNLOAD: 'true'
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+  CHROMEDRIVER_SKIP_DOWNLOAD: 'true'
+
+jobs:
+  check:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tag must match package.json and CHANGELOG.md
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PACKAGE=$(node -p "require('./package.json').version")
+
+          if [ "$TAG" != "$PACKAGE" ]; then
+            echo "::error::Tag v$TAG does not match the version $PACKAGE in package.json."
+            exit 1
+          fi
+
+          if ! grep -q "^## \[$TAG\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no section '## [$TAG]'."
+            exit 1
+          fi
+
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Tests
+    needs: check
+    uses: ./.github/workflows/test.yml
+
+  release:
+    name: Build and publish
+    needs: [check, test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, zip
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Build extension package
+        run: |
+          npm ci
+          npm run extension
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          # Text between "## [VERSION]" and the next "## [" heading.
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' CHANGELOG.md > notes.md
+          cat notes.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" build/*.zip \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file notes.md

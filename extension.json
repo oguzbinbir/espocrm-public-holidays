@@ -5,7 +5,7 @@
     "author": "Oguz Binbir",
     "bundled": true,
     "acceptableVersions": [
-        ">=10.0.0"
+        ">=10.0.4"
     ],
     "php": [
         ">=8.3"
